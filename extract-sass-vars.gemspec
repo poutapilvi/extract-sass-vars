@@ -6,8 +6,8 @@ require 'extract-sass-vars/version'
 Gem::Specification.new do |gem|
   gem.name          = "extract-sass-vars"
   gem.version       = Extract::Sass::Vars::VERSION
-  gem.authors       = ["Chris Eppstein"]
-  gem.email         = ["chris@eppsteins.net"]
+  gem.authors       = ["Chris Eppstein", "Pertti Viitala"]
+  gem.email         = ["chris@eppsteins.net", "pertti.viitala@poutapilvi.fi"]
   gem.description   = %q{Extracts global variables from a Sass file into a json object.}
   gem.summary       = %q{Extracts global variables from a Sass file into a json object.}
   gem.homepage      = ""

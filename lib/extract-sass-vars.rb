@@ -15,12 +15,13 @@ class Sass::Environment
 end
 
 class VariableExtractor
-  def initialize(filename)
+  def initialize(filename, options)
     @filename = filename
+    @options = options
   end
 
   def extract
-    engine = Sass::Engine.for_file(@filename, {})
+    engine = Sass::Engine.for_file(@filename, @options)
     tree = engine.to_tree
     environment = Sass::Environment.new
     visitor = Sass::Tree::Visitors::Perform.new(environment)

@@ -3,15 +3,71 @@ require 'extract-sass-vars'
 require 'optparse'
 require 'json'
 
-options = {}
+options = {
+  :load_paths => [],
+  :pretty => false
+  # :syntax => :sass
+}
 parser = OptionParser.new do |opts|
-  opts.banner = "Usage: extract-sass-vars sass_file json_file"
+  opts.banner = "Usage: extract-sass-vars [options] [INPUT] [OUTPUT]"
+
+  opts.on('-s', '--stdin', :NONE, 'Read input from standard input instead of an input file') do
+    options[:input] = $stdin
+  end
+  opts.on('--trace', :NONE, 'Show a full traceback on error') do
+    options[:trace] = true
+  end
+  opts.on_tail("-?", "-h", "--help", "Show this message") do
+    puts opts
+    exit
+  end
+  opts.on_tail("-v", "--version", "Print version") do
+    puts("extract-sass-vars #{::Extract::Sass::Vars::VERSION}")
+    exit
+  end
+
+  opts.on('-p', '--pretty', 'Pretty format json.') do
+    options[:pretty] = true
+  end
+
+  # opts.on('--scss', 'Use the CSS-superset SCSS syntax.') do
+  #   options[:syntax] = :scss
+  # end
+  opts.on('-q', '--quiet', 'Silence warnings and status messages during compilation.') do
+    options[:quiet] = true
+  end
+  opts.on('--compass', 'Make Compass imports available and load project configuration.') do
+    options[:compass] = true
+  end
+  opts.on('-I', '--load-path PATH', 'Add a sass import path.') do |path|
+    options[:load_paths] << path
+  end
+  opts.on('-r', '--require LIB', 'Require a Ruby library before running Sass.') do |lib|
+    require lib
+  end
+
 end
 
-options = parser.parse(ARGV)
-sass_file, json_file = ARGV
+begin
+  args = parser.parse(ARGV)
 
-vars = VariableExtractor.new(sass_file).extract
-File.open(json_file, "w") do |f|
-  f.puts vars.to_json
+  options[:input] ||= args.shift
+  options[:output] ||= args.shift || $stdout
+
+  vars ||= VariableExtractor.new(options[:input], options).extract || {}
+  formatted = options[:pretty] ? JSON.pretty_generate(vars) : vars.to_json
+  if (options[:output] == $stdout)
+    options[:output].puts formatted
+  else
+    File.open(options[:output], "w") do |f|
+      f.puts formatted
+    end
+  end
+rescue Exception => e
+  raise e if options[:trace] || e.is_a?(SystemExit)
+
+  $stderr.print "#{e.class}: " unless e.class == RuntimeError
+  $stderr.puts "#{e.message}"
+  $stderr.puts "  Use --trace for backtrace."
+  exit 1
 end
