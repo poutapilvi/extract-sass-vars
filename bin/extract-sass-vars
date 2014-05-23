@@ -5,8 +5,10 @@ require 'json'
 
 options = {
   :load_paths => [],
+  :syntax => :sass,
+  :cache => false,
+  :read_cache => true,
   :pretty => false
-  # :syntax => :sass
 }
 parser = OptionParser.new do |opts|
   opts.banner = "Usage: extract-sass-vars [options] [INPUT] [OUTPUT]"
@@ -30,20 +32,23 @@ parser = OptionParser.new do |opts|
     options[:pretty] = true
   end
 
-  # opts.on('--scss', 'Use the CSS-superset SCSS syntax.') do
-  #   options[:syntax] = :scss
-  # end
+  opts.on('--scss', 'Use the CSS-superset SCSS syntax.') do
+    options[:syntax] = :scss
+  end
   opts.on('-q', '--quiet', 'Silence warnings and status messages during compilation.') do
     options[:quiet] = true
-  end
-  opts.on('--compass', 'Make Compass imports available and load project configuration.') do
-    options[:compass] = true
   end
   opts.on('-I', '--load-path PATH', 'Add a sass import path.') do |path|
     options[:load_paths] << path
   end
   opts.on('-r', '--require LIB', 'Require a Ruby library before running Sass.') do |lib|
     require lib
+  end
+  opts.on('--cache-location PATH', 'The path to put cached Sass files. Defaults to .sass-cache.') do |path|
+    options[:cache_location] = path
+  end
+  opts.on('-C', '--no-cache', 'Don\'t cache to sassc files.') do
+    options[:read_cache] = false
   end
 
 end
